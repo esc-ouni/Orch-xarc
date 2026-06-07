@@ -14,6 +14,10 @@ Orch-xarc is an autonomous financial agent that scans Polymarket and Kalshi for 
 
 **Composability**: `compare_strikes` → `determine_strategy_legs` → `build_arbitrage_check` → `rank_opportunities` → `build_execution_plan`.
 
+**Dashboard**: React (Vite) frontend with dark theme visualizing the agent's work in real-time — live tool call timeline color-coded by namespace, subagent isolation panel, arbitrage results with confidence bars, and collapsible tool registry. Connected via SSE streaming (`/scan/demo` runs a full 29-tool demo with no API key needed).
+
+**Deployment**: Full stack runs via `make up` (or `docker compose -f docker/docker-compose.yml up --build`) — backend (Python/FastAPI) + frontend (nginx) with zero local dependencies. Dashboard at `:3000`, API at `:8000`. Makefile automates lifecycle: `make test`, `make evals`, `make logs`, `make clean`.
+
 ## What Was Cut
 
 - **Order execution** — detects opportunities, does not place trades.
