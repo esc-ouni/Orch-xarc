@@ -1,0 +1,20 @@
+{
+  "up": {
+    "outcome": "Up",
+    "best_bid": 0.55,
+    "best_ask": 0.57,
+    "mid": 0.56,
+    "spread": 0.02
+  },
+  "down": {
+    "outcome": "Down",
+    "best_bid": 0.40,
+    "best_ask": 0.42,
+    "mid": 0.41,
+    "spread": 0.02
+  },
+  "slug": "bitcoin-up-or-down-test-event",
+  "price_to_beat": 97500.0,
+  "current_btc_price": 97800.0,
+  "timestamp": "2025-06-07T05:00:00+00:00"
+}

@@ -1,0 +1,61 @@
+# ── Python ──────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+*.manifest
+*.spec
+
+# ── Virtual Environments ───────────────────────────────────
+.venv/
+venv/
+ENV/
+env/
+
+# ── Environment & Secrets ──────────────────────────────────
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+secrets/
+
+# ── IDE / Editor ───────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.settings/
+
+# ── OS Files ───────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# ── Testing & Coverage ────────────────────────────────────
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# ── Logs & Runtime ─────────────────────────────────────────
+*.log
+logs/
+*.pid
+
+# ── Docker ─────────────────────────────────────────────────
+docker-compose.override.yml
+
+# ── Misc ───────────────────────────────────────────────────
+*.bak
+*.tmp
+.cache/
