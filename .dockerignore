@@ -23,9 +23,14 @@ env
 .DS_Store
 Thumbs.db
 
-# Docker
-docker/
+# Docker (keep nginx.conf accessible)
+docker/Dockerfile
+docker/Dockerfile.frontend
 .dockerignore
+
+# Frontend build artifacts (keep source for frontend build)
+frontend/node_modules
+frontend/dist
 
 # Docs / non-runtime
 *.md

@@ -15,7 +15,7 @@ cp .env.example .env          # then edit .env with your API key
 
 # 3. Run
 docker compose -f docker/docker-compose.yml up --build
-# API available at http://localhost:8000
+# Dashboard at http://localhost:3000 · API at http://localhost:8000
 ```
 
 ### Docker Commands
@@ -25,10 +25,10 @@ docker compose -f docker/docker-compose.yml up --build
 docker compose -f docker/docker-compose.yml up --build -d
 
 # Run tests inside the container
-docker compose -f docker/docker-compose.yml run --rm orch-xarc python -m pytest tests/ -v
+docker compose -f docker/docker-compose.yml run --rm backend python -m pytest tests/ -v
 
 # Run the eval harness
-docker compose -f docker/docker-compose.yml run --rm orch-xarc python -m evals.eval_runner
+docker compose -f docker/docker-compose.yml run --rm backend python -m evals.eval_runner
 
 # View logs
 docker compose -f docker/docker-compose.yml logs -f
@@ -47,10 +47,13 @@ docker run -p 8000:8000 --env-file .env orch-xarc
 ## Local Setup (Alternative)
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate
+# Backend
+python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 uvicorn main:app --reload
+
+# Frontend (separate terminal)
+cd frontend && npm install && npm run dev
 ```
 
 ## API Endpoints
@@ -58,8 +61,10 @@ uvicorn main:app --reload
 | Method | Path | Description |
 |--------|------|-------------|
 | `POST` | `/scan` | Trigger a full arbitrage scan |
+| `GET` | `/scan/demo` | SSE stream: demo scan with fixture data (no API key) |
 | `GET` | `/health` | System health + tool count |
 | `GET` | `/tools` | Full tool registry manifest |
+| `GET` | `/tools/stats` | Namespace-grouped tool counts |
 
 ## Project Structure
 
@@ -73,7 +78,8 @@ src/
     ├── kalshi/     # 14 tools
     ├── math_logic/ # 14 tools (subagent scope)
     └── ops/        # 10 tools
-docker/             # Dockerfile + docker-compose.yml
+frontend/           # React dashboard (Vite)
+docker/             # Dockerfiles + compose + nginx
 tests/              # 115 unit + integration tests
 evals/              # Evaluation harness + fixtures
 ```

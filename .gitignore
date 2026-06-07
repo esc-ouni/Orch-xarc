@@ -59,3 +59,4 @@ docker-compose.override.yml
 *.bak
 *.tmp
 .cache/
+node_modules
