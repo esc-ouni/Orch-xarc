@@ -12,7 +12,7 @@ export default function App() {
   const {
     events, phase, phaseIndex, isRunning,
     subagent, arbitrage, scanResult, toolCount,
-    startDemo, PHASES,
+    startScan, PHASES,
   } = useScanStream()
 
   return (
@@ -26,7 +26,7 @@ export default function App() {
       <div className="dashboard-grid">
         <div className="full-width">
           <ScanControl
-            onStartDemo={startDemo}
+            onStartScan={startScan}
             isRunning={isRunning}
             phase={phase}
             phaseIndex={phaseIndex}

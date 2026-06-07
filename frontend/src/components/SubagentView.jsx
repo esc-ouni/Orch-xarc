@@ -4,7 +4,7 @@ export default function SubagentView({ subagent }) {
   return (
     <div className={`card subagent-panel ${isActive ? '' : 'inactive'}`}>
       <div className="subagent-header">
-        <div className="subagent-icon">🧠</div>
+        <div className="subagent-icon">S</div>
         <span className="subagent-label">Arbitrage Subagent</span>
         {subagent?.status === 'running' && (
           <span className="badge badge-subagent">Running</span>

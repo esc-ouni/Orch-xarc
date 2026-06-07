@@ -16,7 +16,6 @@ export default function ToolTimeline({ events }) {
           <span className="card-title">Tool Call Timeline</span>
         </div>
         <div className="empty-state">
-          <div className="empty-icon">🔧</div>
           Run a scan to see tool calls appear here in real-time
         </div>
       </div>
@@ -45,7 +44,7 @@ function TimelineItem({ event }) {
         <div className="timeline-dot" style={{ background: 'var(--accent-subagent)' }} />
         <div className="timeline-content">
           <div className="timeline-tool-name" style={{ color: 'var(--accent-subagent)' }}>
-            🧠 Subagent Spawned
+            Subagent Spawned
           </div>
           <div className="timeline-meta">
             <span className="badge badge-subagent">isolated</span>

@@ -19,7 +19,7 @@ from fastapi import APIRouter, HTTPException
 from starlette.responses import StreamingResponse
 
 from src.agent.parent_graph import run_scan
-from src.api.stream import demo_scan_stream
+from src.api.stream import demo_scan_stream, live_scan_stream
 from src.core.config import settings
 from src.tools.registry import ToolRegistry
 
@@ -67,6 +67,22 @@ async def demo_scan():
     """
     return StreamingResponse(
         demo_scan_stream(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+        },
+    )
+
+@router.get("/scan/live", tags=["scan"])
+async def live_scan():
+    """Stream a live scan via Server-Sent Events.
+    
+    This actually invokes the LLM and streams real tool calls
+    as they happen.
+    """
+    return StreamingResponse(
+        live_scan_stream(max_markets=8), # small default to make the demo run faster
         media_type="text/event-stream",
         headers={
             "Cache-Control": "no-cache",

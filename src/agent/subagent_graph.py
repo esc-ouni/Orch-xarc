@@ -15,7 +15,7 @@ LLM reasoning loop with tool calling.
 from __future__ import annotations
 
 from langchain_core.messages import SystemMessage, HumanMessage
-from langchain_openai import ChatOpenAI
+from src.core.llm_factory import create_llm
 from langgraph.graph import StateGraph, END
 from langgraph.prebuilt import ToolNode
 
@@ -62,11 +62,7 @@ def _should_continue(state: SubagentState) -> str:
 def build_subagent_graph() -> StateGraph:
     """Build the subagent's StateGraph with math_logic tools."""
 
-    llm = ChatOpenAI(
-        model=settings.llm_model,
-        temperature=settings.llm_temperature,
-        api_key=settings.openai_api_key or None,
-    ).bind_tools(MATH_LOGIC_TOOLS)
+    llm = create_llm(tools=MATH_LOGIC_TOOLS)
 
     def agent_node(state: SubagentState) -> dict:
         """Invoke the LLM with the subagent's scoped tools."""
@@ -90,6 +86,7 @@ def invoke_subagent(
     poly_data: dict | None,
     kalshi_data: dict | None,
     binance_data: dict | None,
+    callbacks: Any = None,
 ) -> dict:
     """
     Invoke the arbitrage subagent with platform data.
@@ -153,7 +150,11 @@ def invoke_subagent(
 
     try:
         graph = build_subagent_graph()
-        result = graph.invoke(initial_state)
+        invoke_config = {}
+        if callbacks:
+            invoke_config["callbacks"] = callbacks
+            
+        result = graph.invoke(initial_state, config=invoke_config)
 
         # Extract execution plan from the final state
         # The plan should be in the tool results or the final message

@@ -22,7 +22,7 @@ export default function Header() {
   return (
     <header className="header">
       <div className="header-left">
-        <span className="header-logo">⚡ Orch-xarc</span>
+        <span className="header-logo">Orch-xarc</span>
         <span className="header-subtitle">Autonomous Arbitrage Agent</span>
       </div>
       <div className="header-right">

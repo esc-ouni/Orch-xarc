@@ -35,7 +35,8 @@ class Settings(BaseSettings):
 
     # ── LLM ────────────────────────────────────────────────
     openai_api_key: str = Field(default="", description="OpenAI API key.")
-    llm_model: str = Field(default="gpt-4o", description="Model for LangGraph agent.")
+    google_api_key: str = Field(default="", description="Google AI API key (for Gemini).")
+    llm_model: str = Field(default="gemini-2.5-flash", description="Model for LangGraph agent.")
     llm_temperature: float = Field(default=0.0, ge=0.0, le=2.0)
 
     # ── Rate Limiting ──────────────────────────────────────

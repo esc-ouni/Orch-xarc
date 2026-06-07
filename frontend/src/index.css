@@ -611,12 +611,6 @@ body {
   font-size: 0.85rem;
 }
 
-.empty-icon {
-  font-size: 2rem;
-  margin-bottom: 8px;
-  opacity: 0.4;
-}
-
 /* ── Responsive ────────────────────────────────────────── */
 
 @media (max-width: 900px) {

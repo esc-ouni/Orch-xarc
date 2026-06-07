@@ -21,9 +21,10 @@ from typing import Any
 import structlog
 from langchain_core.messages import SystemMessage, HumanMessage
 from langchain_core.tools import tool
-from langchain_openai import ChatOpenAI
+from src.core.llm_factory import create_llm
 from langgraph.graph import StateGraph, END
 from langgraph.prebuilt import ToolNode
+from langchain_core.runnables import RunnableConfig
 
 from src.agent.state import OrchestratorState
 from src.agent.subagent_graph import invoke_subagent
@@ -90,6 +91,7 @@ def spawn_arbitrage_analysis(
     poly_data: dict,
     kalshi_data: dict,
     binance_data: dict,
+    config: RunnableConfig,
 ) -> dict:
     """Spawn an isolated subagent to analyze arbitrage opportunities.
 
@@ -115,7 +117,7 @@ def spawn_arbitrage_analysis(
     )
 
     start = time.monotonic()
-    result = invoke_subagent(poly_data, kalshi_data, binance_data)
+    result = invoke_subagent(poly_data, kalshi_data, binance_data, callbacks=config.get("callbacks"))
     duration_ms = (time.monotonic() - start) * 1000
 
     logger.info(
@@ -151,11 +153,7 @@ def build_parent_graph() -> StateGraph:
     registry = ToolRegistry()
     all_tools = registry.get_all_tools() + [spawn_arbitrage_analysis]
 
-    llm = ChatOpenAI(
-        model=settings.llm_model,
-        temperature=settings.llm_temperature,
-        api_key=settings.openai_api_key or None,
-    ).bind_tools(all_tools)
+    llm = create_llm(tools=all_tools)
 
     def agent_node(state: OrchestratorState) -> dict:
         """Invoke the LLM with all tools."""
@@ -191,7 +189,7 @@ def build_parent_graph() -> StateGraph:
 # ═══════════════════════════════════════════════════════════
 
 
-def run_scan(scan_params: dict | None = None) -> dict:
+def run_scan(scan_params: dict | None = None, callbacks: Any = None) -> dict:
     """
     Execute a full arbitrage scan using the parent agent.
 
@@ -230,7 +228,11 @@ def run_scan(scan_params: dict | None = None) -> dict:
 
     try:
         graph = build_parent_graph()
-        final_state = graph.invoke(initial_state)
+        invoke_config = {}
+        if callbacks:
+            invoke_config["callbacks"] = callbacks
+        
+        final_state = graph.invoke(initial_state, config=invoke_config)
 
         duration_ms = (time.monotonic() - start) * 1000
 

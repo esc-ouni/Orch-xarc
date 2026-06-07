@@ -21,14 +21,15 @@ export function useScanStream() {
     setToolCount(0)
   }, [])
 
-  const startDemo = useCallback(() => {
+  const startScan = useCallback((isLive = false) => {
     if (eventSourceRef.current) {
       eventSourceRef.current.close()
     }
     reset()
     setIsRunning(true)
 
-    const es = new EventSource('/scan/demo')
+    const endpoint = isLive ? '/scan/live' : '/scan/demo'
+    const es = new EventSource(endpoint)
     eventSourceRef.current = es
 
     es.addEventListener('phase_change', (e) => {
@@ -82,7 +83,7 @@ export function useScanStream() {
     arbitrage,
     scanResult,
     toolCount,
-    startDemo,
+    startScan,
     PHASES,
   }
 }

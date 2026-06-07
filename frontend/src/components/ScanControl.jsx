@@ -1,4 +1,4 @@
-export default function ScanControl({ onStartDemo, isRunning, phase, phaseIndex, PHASES, toolCount, scanResult }) {
+export default function ScanControl({ onStartScan, isRunning, phase, phaseIndex, PHASES, toolCount, scanResult }) {
   const phaseLabels = { init: 'Init', gathering: 'Gathering', analyzing: 'Analyzing', complete: 'Complete' }
 
   return (
@@ -10,13 +10,24 @@ export default function ScanControl({ onStartDemo, isRunning, phase, phaseIndex,
         )}
       </div>
 
-      <button
-        className="btn btn-primary"
-        onClick={onStartDemo}
-        disabled={isRunning}
-      >
-        {isRunning ? '⏳ Scanning…' : '▶ Run Demo Scan'}
-      </button>
+      <div style={{ display: 'flex', gap: 12 }}>
+        <button
+          className="btn btn-primary"
+          onClick={() => onStartScan(false)}
+          disabled={isRunning}
+        >
+          {isRunning ? 'Scanning…' : 'Run Demo Scan'}
+        </button>
+        
+        <button
+          className="btn btn-primary"
+          style={{ background: 'var(--accent-math)' }}
+          onClick={() => onStartScan(true)}
+          disabled={isRunning}
+        >
+          {isRunning ? 'Scanning…' : 'Run Live Scan (Actual LLM)'}
+        </button>
+      </div>
 
       {phase && (
         <>
@@ -43,7 +54,7 @@ export default function ScanControl({ onStartDemo, isRunning, phase, phaseIndex,
 
       {scanResult && (
         <div style={{ marginTop: 12, fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-          ✅ Completed in {(scanResult.total_duration_ms / 1000).toFixed(1)}s · {scanResult.total_tool_calls} tool calls · {scanResult.opportunities_found} opportunity found
+          Completed in {(scanResult.total_duration_ms / 1000).toFixed(1)}s · {scanResult.total_tool_calls} tool calls · {scanResult.opportunities_found} opportunity found
         </div>
       )}
     </div>

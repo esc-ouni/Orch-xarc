@@ -6,7 +6,6 @@ export default function ArbitrageResults({ arbitrage }) {
           <span className="card-title">Arbitrage Results</span>
         </div>
         <div className="empty-state">
-          <div className="empty-icon">📊</div>
           Results will appear after the subagent analysis
         </div>
       </div>

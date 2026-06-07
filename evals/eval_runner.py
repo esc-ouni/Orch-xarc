@@ -36,7 +36,7 @@ def load_fixture(name: str) -> dict:
         return json.load(f)
 
 
-def eval_arbitrage_detection() -> dict:
+def eval_arbitrage_detection(poly_fixture: str, expected_opportunities: int) -> dict:
     """
     Evaluate the full arbitrage detection pipeline using fixture data.
 
@@ -46,7 +46,7 @@ def eval_arbitrage_detection() -> dict:
       3. Validate that known opportunities are detected
       4. Validate that the execution plan is well-formed
     """
-    poly = load_fixture("poly_snapshot_arb.json")
+    poly = load_fixture(poly_fixture)
     kalshi = load_fixture("kalshi_snapshot.json")
 
     poly_strike = poly["price_to_beat"]  # 97500.0
@@ -59,7 +59,7 @@ def eval_arbitrage_detection() -> dict:
     failed = 0
 
     print("═══════════════════════════════════════════════════")
-    print("  Orch-xarc Evaluation Harness")
+    print(f"  Orch-xarc Evaluation: {poly_fixture}")
     print("═══════════════════════════════════════════════════")
     print(f"  Polymarket Strike: ${poly_strike:,.2f}")
     print(f"  Poly Up: ${poly_up_cost:.3f} | Poly Down: ${poly_down_cost:.3f}")
@@ -152,8 +152,16 @@ def eval_arbitrage_detection() -> dict:
             errors.append("Ranking order is wrong")
             print(f"  ❌ Ranking: order is wrong")
     else:
-        print(f"  ⚠️  No arbitrage opportunities found (may be expected)")
+        print(f"  ⚠️  No arbitrage opportunities found")
         passed += 1
+
+    if len(ranked) == expected_opportunities:
+        passed += 1
+        print(f"  ✅ Detected expected number of opportunities ({expected_opportunities})")
+    else:
+        failed += 1
+        errors.append(f"Expected {expected_opportunities} opportunities, found {len(ranked)}")
+        print(f"  ❌ Expected {expected_opportunities} opportunities, found {len(ranked)}")
 
     # ── Test 3: Execution Plan ─────────────────────────────
     plan = build_execution_plan.invoke({
@@ -202,5 +210,17 @@ def eval_arbitrage_detection() -> dict:
 
 
 if __name__ == "__main__":
-    result = eval_arbitrage_detection()
-    sys.exit(1 if result["failed"] > 0 else 0)
+    scenarios = [
+        ("poly_snapshot_arb.json", 1),
+        ("poly_snapshot_no_arb.json", 0),
+        ("poly_snapshot_arb_below.json", 2),
+        ("poly_snapshot_arb_above.json", 3)
+    ]
+    
+    total_failed = 0
+    for poly_file, expected_opps in scenarios:
+        res = eval_arbitrage_detection(poly_file, expected_opps)
+        total_failed += res["failed"]
+        print("\n\n")
+        
+    sys.exit(1 if total_failed > 0 else 0)

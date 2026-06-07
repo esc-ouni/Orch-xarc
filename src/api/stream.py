@@ -10,10 +10,15 @@ from __future__ import annotations
 import asyncio
 import json
 import time
+import queue
+import threading
 from datetime import datetime, timezone
-from typing import AsyncGenerator
+from typing import AsyncGenerator, Any
 
 from starlette.responses import StreamingResponse
+from langchain_core.callbacks import BaseCallbackHandler
+
+from src.agent.parent_graph import run_scan
 
 
 def sse_event(event_type: str, data: dict) -> str:
@@ -193,3 +198,137 @@ async def demo_scan_stream() -> AsyncGenerator[str, None]:
         "opportunities_found": 1,
         "status": "complete",
     })
+
+# ═══════════════════════════════════════════════════════════
+#  Live Scan Implementation
+# ═══════════════════════════════════════════════════════════
+
+class LiveScanCallbackHandler(BaseCallbackHandler):
+    """LangChain callback handler that pushes execution events to a thread-safe queue."""
+    def __init__(self, q: queue.Queue, scan_id: str):
+        self.q = q
+        self.scan_id = scan_id
+        self.start_time = time.monotonic()
+        self.tool_starts: dict[str, float] = {}
+        self.current_phase = "init"
+
+    def _update_phase(self, new_phase: str):
+        if new_phase != self.current_phase:
+            self.current_phase = new_phase
+            labels = {
+                "init": "Initializing",
+                "gathering": "Gathering Market Data",
+                "analyzing": "Analyzing Opportunities",
+                "complete": "Scan Complete"
+            }
+            self.q.put({"type": "phase_change", "data": {
+                "phase": new_phase,
+                "label": labels.get(new_phase, new_phase),
+                "scan_id": self.scan_id,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+            }})
+
+    def on_tool_start(self, serialized: dict[str, Any], input_str: str, **kwargs: Any) -> Any:
+        name = serialized.get("name", "unknown")
+        self.tool_starts[name] = time.monotonic()
+        
+        # Determine namespace and phase updates
+        ns = "ops"
+        if name.startswith("poly"): ns = "polymarket"
+        elif name.startswith("kalshi"): ns = "kalshi"
+        elif name in ["compare_strikes", "determine_strategy_legs", "build_arbitrage_check", "rank_opportunities", "build_execution_plan"]: ns = "math_logic"
+
+        if ns in ["polymarket", "kalshi"]:
+            self._update_phase("gathering")
+        elif ns == "math_logic" or name == "spawn_arbitrage_analysis":
+            self._update_phase("analyzing")
+        elif ns == "ops" and ("format" in name or "summarize" in name):
+            self._update_phase("complete")
+
+        if name == "spawn_arbitrage_analysis":
+            self.q.put({"type": "subagent_spawn", "data": {
+                "tool_name": name,
+                "scoped_tools": 14,
+                "namespace": "math_logic",
+                "input_summary": "Subagent executing scoped math tools...",
+                "elapsed_ms": round((time.monotonic() - self.start_time) * 1000, 1),
+            }})
+
+    def on_tool_end(self, output: Any, **kwargs: Any) -> Any:
+        name = kwargs.get("name", "unknown")
+        
+        start_t = self.tool_starts.pop(name, time.monotonic())
+        dur_ms = (time.monotonic() - start_t) * 1000
+        elapsed_ms = (time.monotonic() - self.start_time) * 1000
+
+        ns = "ops"
+        if name.startswith("poly"): ns = "polymarket"
+        elif name.startswith("kalshi"): ns = "kalshi"
+        elif name in ["compare_strikes", "determine_strategy_legs", "build_arbitrage_check", "rank_opportunities", "build_execution_plan"]: ns = "math_logic"
+
+        is_subagent = (ns == "math_logic")
+
+        self.q.put({"type": "tool_call", "data": {
+            "namespace": ns,
+            "tool_name": name,
+            "success": True,
+            "duration_ms": round(dur_ms, 1),
+            "result_preview": str(output)[:200],
+            "elapsed_ms": round(elapsed_ms, 1),
+            "phase": self.current_phase,
+            "is_subagent": is_subagent,
+        }})
+
+        if name == "spawn_arbitrage_analysis":
+            # Subagent has completed
+            try:
+                res = json.loads(output) if isinstance(output, str) else output
+                if isinstance(res, dict):
+                    self.q.put({"type": "subagent_complete", "data": {
+                        "opportunities_found": len(res.get("opportunities", [])),
+                        "best_margin": res.get("best_opportunity", {}).get("margin", 0),
+                        "recommended_action": res.get("recommended_action", "unknown"),
+                        "confidence": res.get("confidence", 0),
+                        "elapsed_ms": round(elapsed_ms, 1)
+                    }})
+                    self.q.put({"type": "arbitrage_result", "data": res})
+            except Exception:
+                pass
+
+
+async def live_scan_stream(max_markets: int = 20) -> AsyncGenerator[str, None]:
+    """Stream a live scan by running the parent agent in a background thread."""
+    import uuid
+    scan_id = f"live-{uuid.uuid4().hex[:12]}"
+    q: queue.Queue = queue.Queue()
+    
+    # Emit initial phase before thread starts
+    q.put({"type": "phase_change", "data": {
+        "phase": "init", "label": "Initializing", "scan_id": scan_id,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+    }})
+
+    def run_agent():
+        handler = LiveScanCallbackHandler(q, scan_id)
+        start_time = time.monotonic()
+        try:
+            result = run_scan({"scan_id": scan_id, "max_markets": max_markets}, callbacks=[handler])
+            q.put({"type": "scan_complete", "data": {
+                "scan_id": scan_id,
+                "total_tool_calls": result.get("tool_calls_count", 0),
+                "total_duration_ms": result.get("duration_ms", 0),
+                "opportunities_found": len(result.get("execution_plan", {}).get("opportunities", [])),
+                "status": "complete",
+            }})
+        except Exception as e:
+            q.put({"type": "error", "data": {"error": str(e)}})
+        finally:
+            q.put(None)  # Sentinel
+
+    threading.Thread(target=run_agent, daemon=True).start()
+
+    while True:
+        item = await asyncio.to_thread(q.get)
+        if item is None:
+            break
+        yield sse_event(item["type"], item["data"])
