@@ -4,6 +4,7 @@ const NS_COLORS = {
   polymarket: 'var(--accent-polymarket)',
   kalshi: 'var(--accent-kalshi)',
   math_logic: 'var(--accent-math)',
+  execution: 'var(--accent-execution)',
   ops: 'var(--accent-ops)',
 }
 
@@ -26,7 +27,7 @@ export default function ToolRegistry() {
     <div className="card">
       <div className="card-header">
         <span className="card-title">Tool Registry</span>
-        <span className="header-meta">{data.total} tools · 4 namespaces</span>
+        <span className="header-meta">{data.total} tools · {Object.keys(data.namespaces).length} namespaces</span>
       </div>
 
       {Object.entries(data.namespaces).map(([ns, info]) => (
