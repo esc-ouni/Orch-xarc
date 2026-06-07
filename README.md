@@ -1,48 +1,32 @@
 # Orch-xarc
 
-Autonomous arbitrage agent scanning Polymarket and Kalshi for BTC price opportunities. Built with Python, FastAPI, and LangGraph.
+Autonomous arbitrage agent scanning Polymarket and Kalshi for BTC price opportunities. Built with Python, FastAPI, LangGraph, and React.
 
-## Quick Start (Docker)
+## Quick Start
 
 ```bash
-# 1. Clone
 git clone https://github.com/esc-ouni/Orch-xarc.git
 cd Orch-xarc
-
-# 2. Configure
-cp .env.example .env          # then edit .env with your API key
-# Required: ORCH_OPENAI_API_KEY=sk-...
-
-# 3. Run
-docker compose -f docker/docker-compose.yml up --build
-# Dashboard at http://localhost:3000 · API at http://localhost:8000
+cp .env.example .env      # edit with your ORCH_OPENAI_API_KEY
+make up
 ```
 
-### Docker Commands
+Dashboard at `http://localhost:3000` · API at `http://localhost:8000`
 
-```bash
-# Run the API server
-docker compose -f docker/docker-compose.yml up --build -d
+## Makefile Commands
 
-# Run tests inside the container
-docker compose -f docker/docker-compose.yml run --rm backend python -m pytest tests/ -v
-
-# Run the eval harness
-docker compose -f docker/docker-compose.yml run --rm backend python -m evals.eval_runner
-
-# View logs
-docker compose -f docker/docker-compose.yml logs -f
-
-# Stop
-docker compose -f docker/docker-compose.yml down
-```
-
-### Without Compose
-
-```bash
-docker build -f docker/Dockerfile -t orch-xarc .
-docker run -p 8000:8000 --env-file .env orch-xarc
-```
+| Command | Description |
+|---------|-------------|
+| `make up` | Build & start full stack (backend + frontend) |
+| `make down` | Stop and remove containers |
+| `make build` | Build images without starting |
+| `make test` | Run all 115 tests in Docker |
+| `make evals` | Run evaluation harness in Docker |
+| `make logs` | Tail container logs |
+| `make dev` | Start local dev servers (no Docker) |
+| `make lint` | Run ruff linter |
+| `make clean` | Stop containers, remove images, prune volumes |
+| `make clean-all` | Above + remove all caches |
 
 ## Local Setup (Alternative)
 
@@ -71,7 +55,7 @@ cd frontend && npm install && npm run dev
 ```
 src/
 ├── agent/          # LangGraph parent + subagent
-├── api/            # FastAPI routes
+├── api/            # FastAPI routes + SSE streaming
 ├── core/           # Exceptions, rate limiter, retries, config, models, observability
 └── tools/
     ├── polymarket/ # 15 tools
@@ -82,6 +66,7 @@ frontend/           # React dashboard (Vite)
 docker/             # Dockerfiles + compose + nginx
 tests/              # 115 unit + integration tests
 evals/              # Evaluation harness + fixtures
+Makefile            # Lifecycle automation
 ```
 
 See [MEMO.md](MEMO.md) for design decisions and architecture details.
