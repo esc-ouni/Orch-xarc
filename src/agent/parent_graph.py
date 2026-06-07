@@ -66,11 +66,14 @@ You must follow this EXACT multi-phase workflow. Use the tools available to you.
 ## Phase 3: ANALYZING
 19. Call spawn_arbitrage_analysis with ALL gathered data to run the subagent
 
-## Phase 4: COMPLETE
-20. Call ops_timestamp_now to record end time
-21. Call ops_calculate_duration to get total runtime
-22. Call ops_format_scan_result with the final results
-23. Call ops_summarize_agent_run with run metadata
+## Phase 4: EXECUTION
+20. Check the subagent's execution plan. If `recommended_action` is `strong_buy`, use the execution tools (exec_validate_wallet, exec_place_polymarket_order, exec_place_kalshi_order, exec_verify_fill) to simulate trade placement based on the best opportunity.
+
+## Phase 5: COMPLETE
+21. Call ops_timestamp_now to record end time
+22. Call ops_calculate_duration to get total runtime
+23. Call ops_format_scan_result with the final results
+24. Call ops_summarize_agent_run with run metadata
 
 CRITICAL RULES:
 - Follow the phases IN ORDER. Do not skip ahead.

@@ -1,5 +1,5 @@
 export default function ScanControl({ onStartScan, isRunning, phase, phaseIndex, PHASES, toolCount, scanResult }) {
-  const phaseLabels = { init: 'Init', gathering: 'Gathering', analyzing: 'Analyzing', complete: 'Complete' }
+  const phaseLabels = { init: 'Init', gathering: 'Gathering', analyzing: 'Analyzing', execution: 'Executing', complete: 'Complete' }
 
   return (
     <div className="card">

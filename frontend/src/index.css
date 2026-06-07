@@ -20,6 +20,7 @@
   --accent-polymarket: #3b82f6;
   --accent-kalshi: #8b5cf6;
   --accent-math: #10b981;
+  --accent-execution: #14b8a6;
   --accent-ops: #f59e0b;
   --accent-subagent: #ec4899;
   --accent-error: #ef4444;
@@ -187,6 +188,7 @@ body {
 .badge-polymarket { background: rgba(59, 130, 246, 0.15); color: var(--accent-polymarket); }
 .badge-kalshi { background: rgba(139, 92, 246, 0.15); color: var(--accent-kalshi); }
 .badge-math_logic { background: rgba(16, 185, 129, 0.15); color: var(--accent-math); }
+.badge-execution { background: rgba(20, 184, 166, 0.15); color: var(--accent-execution); }
 .badge-ops { background: rgba(245, 158, 11, 0.15); color: var(--accent-ops); }
 .badge-subagent { background: rgba(236, 72, 153, 0.15); color: var(--accent-subagent); }
 

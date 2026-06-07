@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef } from 'react'
 
-const PHASES = ['init', 'gathering', 'analyzing', 'complete']
+const PHASES = ['init', 'gathering', 'analyzing', 'execution', 'complete']
 
 export function useScanStream() {
   const [events, setEvents] = useState([])

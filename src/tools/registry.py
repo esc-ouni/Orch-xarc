@@ -21,6 +21,7 @@ from src.tools.polymarket.tools import POLYMARKET_TOOLS
 from src.tools.kalshi.tools import KALSHI_TOOLS
 from src.tools.math_logic.tools import MATH_LOGIC_TOOLS
 from src.tools.ops.tools import OPS_TOOLS
+from src.tools.execution.tools import EXECUTION_TOOLS
 
 
 class ToolRegistry:
@@ -32,6 +33,7 @@ class ToolRegistry:
             "kalshi": list(KALSHI_TOOLS),
             "math_logic": list(MATH_LOGIC_TOOLS),
             "ops": list(OPS_TOOLS),
+            "execution": list(EXECUTION_TOOLS),
         }
 
     # ── Queries ─────────────────────────────────────────────

@@ -1,13 +1,13 @@
 # Orch-xarc
 
-Autonomous arbitrage agent scanning Polymarket and Kalshi for BTC price opportunities. Built with Python, FastAPI, LangGraph, and React.
+Autonomous arbitrage agent scanning Polymarket and Kalshi for BTC price opportunities. Built with Python, FastAPI, LangGraph, and React, powered by Google Gemini.
 
 ## Quick Start
 
 ```bash
 git clone https://github.com/esc-ouni/Orch-xarc.git
 cd Orch-xarc
-cp .env.example .env      # edit with your ORCH_OPENAI_API_KEY
+cp .env.example .env      # edit with your ORCH_GOOGLE_API_KEY
 make up
 ```
 
@@ -45,6 +45,7 @@ cd frontend && npm install && npm run dev
 | Method | Path | Description |
 |--------|------|-------------|
 | `POST` | `/scan` | Trigger a full arbitrage scan |
+| `GET` | `/scan/live` | SSE stream: live scan using actual LLM via LangChain callbacks |
 | `GET` | `/scan/demo` | SSE stream: demo scan with fixture data (no API key) |
 | `GET` | `/health` | System health + tool count |
 | `GET` | `/tools` | Full tool registry manifest |
@@ -61,7 +62,8 @@ src/
     ├── polymarket/ # 15 tools
     ├── kalshi/     # 14 tools
     ├── math_logic/ # 14 tools (subagent scope)
-    └── ops/        # 10 tools
+    ├── ops/        # 10 tools
+    └── execution/  # 4 tools (simulated trade placement)
 frontend/           # React dashboard (Vite)
 docker/             # Dockerfiles + compose + nginx
 tests/              # 115 unit + integration tests

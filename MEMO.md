@@ -4,30 +4,31 @@
 
 Orch-xarc is an autonomous financial agent that scans Polymarket and Kalshi for BTC arbitrage. Python, FastAPI, LangGraph.
 
-**53 tools** across 4 namespaces (`polymarket` 15, `kalshi` 14, `math_logic` 14, `ops` 10). Model-driven selection via `ToolRegistry` — no conditional dispatch.
+**57 tools** across 5 namespaces (`polymarket` 15, `kalshi` 14, `math_logic` 14, `ops` 10, `execution` 4). Model-driven selection via `ToolRegistry` — no conditional dispatch.
 
 **Subagent**: `spawn_arbitrage_analysis` creates a separate `StateGraph` with its own `SubagentState`, own messages, and 14 scoped math tools. Cannot call platform APIs.
 
-**Long-horizon**: system prompt drives 23 tool calls across 4 phases. `OrchestratorState` carries 9 explicit context fields across all calls.
+**Long-horizon**: system prompt drives tool calls across 5 phases (Init, Gathering, Analyzing, Execution, Complete). `OrchestratorState` carries 9 explicit context fields across all calls.
+**LLM Factory**: Natively supports Google Gemini via `langchain-google-genai` and OpenAI via a dynamic factory, prioritizing `gemini-2.5-flash` for high-frequency tool calling.
 
-**Production scaffolding**: structlog JSON + OpenTelemetry, token-bucket rate limiter, exponential-backoff retries, 10-class typed exception hierarchy, eval harness (30 assertions), 115 tests (unit + integration). Dockerized via multi-stage build with non-root user, healthcheck, and compose — zero local dependency setup.
+**Production scaffolding**: structlog JSON + OpenTelemetry, token-bucket rate limiter, exponential-backoff retries, 10-class typed exception hierarchy, eval harness (4 scenarios, 123 assertions), 115 tests (unit + integration). Dockerized via multi-stage build with non-root user, healthcheck, and compose — zero local dependency setup.
 
 **Composability**: `compare_strikes` → `determine_strategy_legs` → `build_arbitrage_check` → `rank_opportunities` → `build_execution_plan`.
 
-**Dashboard**: React (Vite) frontend with dark theme visualizing the agent's work in real-time — live tool call timeline color-coded by namespace, subagent isolation panel, arbitrage results with confidence bars, and collapsible tool registry. Connected via SSE streaming (`/scan/demo` runs a full 29-tool demo with no API key needed).
+**Dashboard**: React (Vite) frontend with a sleek, minimalist fintech aesthetic (no emojis) visualizing the agent's work in real-time. Live tool call timeline color-coded by namespace, subagent isolation panel, arbitrage results with confidence bars. Connected via SSE streaming (`/scan/live` uses real LangChain callbacks directly from the executing graph).
 
 **Deployment**: Full stack runs via `make up` (or `docker compose -f docker/docker-compose.yml up --build`) — backend (Python/FastAPI) + frontend (nginx) with zero local dependencies. Dashboard at `:3000`, API at `:8000`. Makefile automates lifecycle: `make test`, `make evals`, `make logs`, `make clean`.
 
 ## What Was Cut
 
-- **Order execution** — detects opportunities, does not place trades.
+- **Live Mainnet Execution** — the `execution` namespace simulates transactions via delays and placeholder IDs; production requires wallet key integration.
 - **WebSocket streaming** — HTTP polling; production would use WebSocket feeds.
 - **Multi-event scanning** — one hourly BTC market; extending requires parameterizing discovery.
 - **Persistent state** — results are ephemeral; production would persist to PostgreSQL.
 
 ## What More Time Would Address
 
-**Week 2**: WebSocket orderbook streaming, circuit breakers, persistent scan history. **Week 3**: multi-asset support, automatic cross-platform pair discovery. **Week 4**: order execution via py-clob-client and authenticated Kalshi API, position sizing, stop-loss.
+**Week 2**: WebSocket orderbook streaming, circuit breakers, persistent scan history. **Week 3**: multi-asset support, automatic cross-platform pair discovery. **Week 4**: live order execution via py-clob-client and authenticated Kalshi API using secure wallet signing.
 
 ## Design Decision
 

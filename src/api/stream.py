@@ -219,6 +219,7 @@ class LiveScanCallbackHandler(BaseCallbackHandler):
                 "init": "Initializing",
                 "gathering": "Gathering Market Data",
                 "analyzing": "Analyzing Opportunities",
+                "execution": "Executing Trades",
                 "complete": "Scan Complete"
             }
             self.q.put({"type": "phase_change", "data": {
@@ -236,12 +237,15 @@ class LiveScanCallbackHandler(BaseCallbackHandler):
         ns = "ops"
         if name.startswith("poly"): ns = "polymarket"
         elif name.startswith("kalshi"): ns = "kalshi"
+        elif name.startswith("exec_"): ns = "execution"
         elif name in ["compare_strikes", "determine_strategy_legs", "build_arbitrage_check", "rank_opportunities", "build_execution_plan"]: ns = "math_logic"
 
         if ns in ["polymarket", "kalshi"]:
             self._update_phase("gathering")
         elif ns == "math_logic" or name == "spawn_arbitrage_analysis":
             self._update_phase("analyzing")
+        elif ns == "execution":
+            self._update_phase("execution")
         elif ns == "ops" and ("format" in name or "summarize" in name):
             self._update_phase("complete")
 
@@ -264,6 +268,7 @@ class LiveScanCallbackHandler(BaseCallbackHandler):
         ns = "ops"
         if name.startswith("poly"): ns = "polymarket"
         elif name.startswith("kalshi"): ns = "kalshi"
+        elif name.startswith("exec_"): ns = "execution"
         elif name in ["compare_strikes", "determine_strategy_legs", "build_arbitrage_check", "rank_opportunities", "build_execution_plan"]: ns = "math_logic"
 
         is_subagent = (ns == "math_logic")
