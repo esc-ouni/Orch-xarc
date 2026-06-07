@@ -148,7 +148,7 @@ def invoke_subagent(
         "binance_data": binance_data,
         "checks_performed": [],
         "opportunities_found": [],
-        "execution_plan": None,
+        "analysis_result": None,
     }
 
     try:

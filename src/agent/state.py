@@ -89,5 +89,6 @@ class SubagentState(TypedDict):
     checks_performed: list[dict]
     opportunities_found: list[dict]
 
-    # Output
-    execution_plan: dict | None
+    # Output (deliberately named differently from parent's `execution_plan`
+    # to make the isolation boundary unambiguous)
+    analysis_result: dict | None
