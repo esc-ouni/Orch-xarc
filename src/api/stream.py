@@ -167,7 +167,31 @@ async def demo_scan_stream() -> AsyncGenerator[str, None]:
         "total_checks": 9,
     })
 
-    # ── Phase 4: COMPLETE ──────────────────────────────────
+    # ── Phase 4: EXECUTION ─────────────────────────────────
+    yield sse_event("phase_change", {
+        "phase": "execution", "label": "Executing Trades",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+    })
+    await asyncio.sleep(0.3)
+
+    exec_tools = [
+        ("execution", "exec_validate_wallet", {"status": "valid", "platform": "polymarket"}),
+        ("execution", "exec_place_polymarket_order", {"status": "success", "action": "buy", "outcome": "Down", "price": 0.42}),
+        ("execution", "exec_place_kalshi_order", {"status": "success", "action": "buy", "outcome": "Yes", "strike": 97500, "price": 0.52}),
+        ("execution", "exec_verify_fill", {"status": "filled", "order_id": "poly-ord-12345"}),
+    ]
+
+    for ns, name, result in exec_tools:
+        await asyncio.sleep(0.3)
+        yield sse_event("tool_call", {
+            "namespace": ns, "tool_name": name, "success": True,
+            "duration_ms": round(150 + 50 * 0.5, 1),
+            "result_preview": json.dumps(result, default=str)[:200],
+            "elapsed_ms": elapsed(), "phase": "execution",
+            "is_subagent": False,
+        })
+
+    # ── Phase 5: COMPLETE ──────────────────────────────────
     yield sse_event("phase_change", {
         "phase": "complete", "label": "Scan Complete",
         "timestamp": datetime.now(timezone.utc).isoformat(),
@@ -178,7 +202,7 @@ async def demo_scan_stream() -> AsyncGenerator[str, None]:
         ("ops", "ops_timestamp_now", {"timestamp": datetime.now(timezone.utc).isoformat()}),
         ("ops", "ops_calculate_duration", {"duration_ms": elapsed()}),
         ("ops", "ops_format_scan_result", {"summary": f"Scan {scan_id}: 1 opportunity found, best margin $0.06"}),
-        ("ops", "ops_summarize_agent_run", {"total_tool_calls": 29, "total_errors": 0, "duration_ms": elapsed()}),
+        ("ops", "ops_summarize_agent_run", {"total_tool_calls": 33, "total_errors": 0, "duration_ms": elapsed()}),
     ]
 
     for ns, name, result in complete_tools:
@@ -193,7 +217,7 @@ async def demo_scan_stream() -> AsyncGenerator[str, None]:
     # ── Done ───────────────────────────────────────────────
     yield sse_event("scan_complete", {
         "scan_id": scan_id,
-        "total_tool_calls": 29,
+        "total_tool_calls": 33,
         "total_duration_ms": elapsed(),
         "opportunities_found": 1,
         "status": "complete",

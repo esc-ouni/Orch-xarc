@@ -1,7 +1,7 @@
 export default function StatsCards({ toolCount, scanResult, arbitrage }) {
   const stats = [
-    { value: 53, label: 'Tools' },
-    { value: 4, label: 'Namespaces' },
+    { value: 57, label: 'Tools' },
+    { value: 5, label: 'Namespaces' },
     {
       value: toolCount || '—',
       label: 'Tool Calls',

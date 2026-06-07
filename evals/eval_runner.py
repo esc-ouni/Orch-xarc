@@ -36,7 +36,7 @@ def load_fixture(name: str) -> dict:
         return json.load(f)
 
 
-def eval_arbitrage_detection(poly_fixture: str, expected_opportunities: int) -> dict:
+def eval_arbitrage_detection(poly_fixture: str, kalshi_fixture: str, expected_opportunities: int) -> dict:
     """
     Evaluate the full arbitrage detection pipeline using fixture data.
 
@@ -47,7 +47,7 @@ def eval_arbitrage_detection(poly_fixture: str, expected_opportunities: int) -> 
       4. Validate that the execution plan is well-formed
     """
     poly = load_fixture(poly_fixture)
-    kalshi = load_fixture("kalshi_snapshot.json")
+    kalshi = load_fixture(kalshi_fixture)
 
     poly_strike = poly["price_to_beat"]  # 97500.0
     poly_up_cost = poly["up"]["best_ask"]  # 0.57
@@ -211,15 +211,16 @@ def eval_arbitrage_detection(poly_fixture: str, expected_opportunities: int) -> 
 
 if __name__ == "__main__":
     scenarios = [
-        ("poly_snapshot_arb.json", 1),
-        ("poly_snapshot_no_arb.json", 0),
-        ("poly_snapshot_arb_below.json", 2),
-        ("poly_snapshot_arb_above.json", 3)
+        ("poly_snapshot_arb.json", "kalshi_snapshot.json", 1),
+        ("poly_snapshot_no_arb.json", "kalshi_snapshot.json", 0),
+        ("poly_snapshot_arb_below.json", "kalshi_snapshot.json", 2),
+        ("poly_snapshot_arb_above.json", "kalshi_snapshot.json", 3),
+        ("poly_snapshot_arb.json", "kalshi_empty.json", 0)
     ]
     
     total_failed = 0
-    for poly_file, expected_opps in scenarios:
-        res = eval_arbitrage_detection(poly_file, expected_opps)
+    for poly_file, kalshi_file, expected_opps in scenarios:
+        res = eval_arbitrage_detection(poly_file, kalshi_file, expected_opps)
         total_failed += res["failed"]
         print("\n\n")
         
