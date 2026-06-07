@@ -10,7 +10,7 @@ Orch-xarc is an autonomous financial agent that scans Polymarket and Kalshi for 
 
 **Long-horizon**: system prompt drives 23 tool calls across 4 phases. `OrchestratorState` carries 9 explicit context fields across all calls.
 
-**Production scaffolding**: structlog JSON + OpenTelemetry, token-bucket rate limiter, exponential-backoff retries, 10-class typed exception hierarchy, eval harness (30 assertions), 115 tests (unit + integration).
+**Production scaffolding**: structlog JSON + OpenTelemetry, token-bucket rate limiter, exponential-backoff retries, 10-class typed exception hierarchy, eval harness (30 assertions), 115 tests (unit + integration). Dockerized via multi-stage build with non-root user, healthcheck, and compose — zero local dependency setup.
 
 **Composability**: `compare_strikes` → `determine_strategy_legs` → `build_arbitrage_check` → `rank_opportunities` → `build_execution_plan`.
 
