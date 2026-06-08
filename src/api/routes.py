@@ -154,7 +154,7 @@ async def tool_stats() -> dict:
     """Return namespace-grouped tool counts for the dashboard."""
     registry = ToolRegistry()
     stats = {}
-    for ns in ["polymarket", "kalshi", "math_logic", "ops"]:
+    for ns in registry._namespaces.keys():
         tools = registry.get_namespace_tools(ns)
         stats[ns] = {
             "count": len(tools),
