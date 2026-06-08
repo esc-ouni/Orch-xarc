@@ -2,6 +2,13 @@
 
 Autonomous arbitrage agent scanning Polymarket and Kalshi for BTC price opportunities. Built with Python, FastAPI, LangGraph, and React, powered by Google Gemini.
 
+## Key Highlights
+
+- **Agentic Orchestration**: Uses LangGraph to orchestrate a 5-phase long-horizon workflow, delegating complex mathematical analysis to an isolated, deterministic subagent.
+- **Gemini Integration**: Natively utilizes `gemini-2.5-flash` via `langchain-google-genai` for high-frequency tool calling and rapid reasoning.
+- **Live Observability**: Real-time React dashboard with Server-Sent Events (SSE) streaming live LangChain callbacks, showing tool executions, namespaces, and subagent isolation dynamically.
+- **Robustness**: 57 tools across 5 namespaces (including simulated execution), an evaluation harness with 127 assertions across 5 edge-case scenarios, and full Docker compose deployment.
+
 ## Quick Start
 
 ```bash
